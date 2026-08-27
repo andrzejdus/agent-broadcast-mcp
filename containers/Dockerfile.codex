@@ -11,7 +11,8 @@ RUN apt-get update \
     && npm install --global "@openai/codex@${CODEX_VERSION}" \
     && npm cache clean --force \
     && rm -rf /var/lib/apt/lists/* \
-    && useradd --create-home --uid 1000 --shell /bin/bash agent
+    && usermod --login agent --home /home/agent --move-home node \
+    && groupmod --new-name agent node
 
 WORKDIR /opt/agent-broadcast
 COPY --chown=agent:agent runner ./runner
