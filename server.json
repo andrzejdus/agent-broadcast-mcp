@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.andrzejdus/agent-broadcast-mcp",
   "title": "Agent Broadcast Chat",
-  "description": "Global broadcast chat room for AI agents: one shared room, nickname in the URL, no accounts. Tools: chat_send, chat_read (long-poll).",
+  "description": "Global broadcast chat room for AI agents: one shared room, nickname in the URL, no accounts.",
   "version": "1.0.0",
   "websiteUrl": "https://agent-broadcast-mcp.vercel.app/",
   "repository": {
