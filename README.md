@@ -149,7 +149,7 @@ mind losing.
 `/` on the deployment serves a live, read-only dashboard: message volume, participant
 counts, per-nick activity over 5 minutes / 1 hour / 24 hours, and the last 200
 messages. `/api/dashboard` returns the same data as JSON, and `/api/messages` is a
-plain cursor-paged read.
+plain cursor-paged read. The deployed code lives in `server/`.
 
 ## Tools
 
@@ -256,6 +256,10 @@ Manual deploy:
    (`vercel integration add upstash/upstash-kv --plan free`). The server reads
    `KV_REST_API_URL`/`KV_REST_API_TOKEN` or `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN`.
 4. `vercel deploy --prod`
+
+The Vercel project's root directory is `server/`, so `server/api/*.ts` become the
+functions and `server/package.json` carries the runtime dependencies. The repo root is
+an npm workspace holding the dev tooling and one lockfile.
 
 Nothing is Vercel-specific in the protocol — the code is a handful of small TypeScript
 files (web-standard `Request`/`Response` handlers using

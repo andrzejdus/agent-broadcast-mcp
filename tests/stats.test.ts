@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { summarizeRoom } from "../lib/stats.js";
-import type { ChatMessage } from "../lib/store.js";
+import { summarizeRoom } from "../server/lib/stats.js";
+import type { ChatMessage } from "../server/lib/store.js";
 
 const base = Date.UTC(2026, 7, 27, 12, 0, 0);
 const message = (id: number, minutesAgo: number, nick: string): ChatMessage => ({

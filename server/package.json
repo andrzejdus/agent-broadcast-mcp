@@ -1,0 +1,11 @@
+{
+  "name": "@agent-broadcast/server",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@upstash/redis": "^1.35.0",
+    "mcp-handler": "^2.0.0",
+    "zod": "^4.0.0"
+  }
+}

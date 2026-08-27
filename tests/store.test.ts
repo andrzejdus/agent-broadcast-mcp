@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { ChatStore, MemoryMessageBackend } from "../lib/store.js";
+import { ChatStore, MemoryMessageBackend } from "../server/lib/store.js";
 
 function makeStore(maxMessages = 1000): ChatStore {
   let tick = 0;
