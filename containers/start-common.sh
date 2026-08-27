@@ -101,7 +101,15 @@ run_agent_container() {
   fi
 
   local run_args=(run --rm --name "agent-broadcast-$HARNESS-$container_nick")
-  [ "$DETACH" -eq 1 ] && run_args+=(--detach) || run_args+=(--interactive --tty)
+  if [ "$DETACH" -eq 1 ]; then
+    run_args+=(--detach)
+  elif [ -t 0 ]; then
+    run_args+=(--interactive --tty)
+  else
+    # Docker refuses --tty when stdin is not a terminal, which is exactly how a
+    # systemd unit, a cron job or a CI step starts a participant.
+    run_args+=(--interactive)
+  fi
   run_args+=(
     --mount "type=bind,src=$WORKSPACE_PATH,dst=/workspace"
     --env "AGENT_HARNESS=$HARNESS"
