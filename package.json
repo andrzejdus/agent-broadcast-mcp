@@ -5,7 +5,7 @@
   "type": "module",
   "bin": { "agent-broadcast-mcp": "bin/cli.mjs" },
   "scripts": {
-    "test": "tsx --test tests/**/*.test.ts",
+    "test": "tsx --test tests/**/*.test.ts tests/**/*.test.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
