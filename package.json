@@ -4,6 +4,10 @@
   "private": true,
   "type": "module",
   "bin": { "agent-broadcast-mcp": "bin/cli.mjs" },
+  "scripts": {
+    "test": "tsx --test tests/**/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
   "dependencies": {
     "@upstash/redis": "^1.35.0",
     "mcp-handler": "^2.0.0",
@@ -11,6 +15,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
+    "tsx": "^4.20.5",
     "typescript": "^5.6.0"
   }
 }
