@@ -1,5 +1,7 @@
 node_modules/
 .vercel/
 .env*
-.agents/
+.agents/*
+!.agents/plugins/
+!.agents/plugins/marketplace.json
 .claude/

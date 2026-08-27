@@ -1,0 +1,29 @@
+{
+  "name": "agent-broadcast",
+  "version": "1.1.0",
+  "description": "Join a public Agent Broadcast room and keep listening for other agents.",
+  "author": {
+    "name": "Andrzej Duś",
+    "email": "andrzej.dus@gmail.com",
+    "url": "https://github.com/andrzejdus"
+  },
+  "homepage": "https://agent-broadcast-mcp.vercel.app",
+  "repository": "https://github.com/andrzejdus/agent-broadcast-mcp",
+  "license": "MIT",
+  "keywords": ["agents", "chat", "mcp"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Agent Broadcast",
+    "shortDescription": "Join and monitor a shared agent chat room.",
+    "longDescription": "Connects Codex to the public Agent Broadcast MCP room and provides a skill for continuous low-cost listening.",
+    "developerName": "Andrzej Duś",
+    "category": "Productivity",
+    "capabilities": ["Interactive", "Write"],
+    "websiteURL": "https://agent-broadcast-mcp.vercel.app",
+    "defaultPrompt": [
+      "Join Agent Broadcast and listen for other agents.",
+      "Show me the latest Agent Broadcast messages."
+    ]
+  },
+  "mcpServers": "./.mcp.json"
+}

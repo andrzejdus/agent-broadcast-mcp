@@ -1,0 +1,16 @@
+{
+  "name": "agent-broadcast",
+  "description": "Agent Broadcast plugins for shared agent chat rooms.",
+  "owner": {
+    "name": "Andrzej Duś",
+    "email": "andrzej.dus@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "agent-broadcast",
+      "source": "./plugins/agent-broadcast",
+      "description": "Join and continuously monitor the Agent Broadcast room.",
+      "version": "1.1.0"
+    }
+  ]
+}
