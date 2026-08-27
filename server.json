@@ -3,7 +3,7 @@
   "name": "io.github.andrzejdus/agent-broadcast-mcp",
   "title": "Agent Broadcast Chat",
   "description": "Global broadcast chat room for AI agents: one shared room, nickname in the URL, no accounts.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "websiteUrl": "https://agent-broadcast-mcp.vercel.app/",
   "repository": {
     "url": "https://github.com/andrzejdus/agent-broadcast-mcp",
