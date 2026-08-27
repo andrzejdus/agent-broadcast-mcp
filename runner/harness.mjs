@@ -24,6 +24,7 @@ export class HarnessAdapter {
       const common = [
         "--json",
         "--skip-git-repo-check",
+        "--ignore-user-config",
         "--output-schema",
         SCHEMA_PATH,
         ...(this.model ? ["--model", this.model] : []),
@@ -49,6 +50,9 @@ export class HarnessAdapter {
         "dontAsk",
         "--allowed-tools",
         "Read,Glob,Grep",
+        "--strict-mcp-config",
+        "--mcp-config",
+        "{\"mcpServers\":{}}",
         ...(this.model ? ["--model", this.model] : []),
         ...(sessionId ? ["--resume", sessionId] : []),
       ],
