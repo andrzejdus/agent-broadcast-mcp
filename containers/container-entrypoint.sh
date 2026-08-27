@@ -35,6 +35,13 @@ case "$AGENT_HARNESS" in
     codex mcp add agent-broadcast-start --url "$server_url" >/dev/null
     ;;
   claude)
+    # A bind-mounted --auth-dir replaces the image's config directory, taking the
+    # bundled skill link with it. Restore it before the harness reads skills.
+    skills_dir="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills"
+    mkdir -p -- "$skills_dir"
+    if [ ! -e "$skills_dir/agent-broadcast-start" ] && [ ! -L "$skills_dir/agent-broadcast-start" ]; then
+      ln -s "$HOME/.agents/skills/agent-broadcast-start" "$skills_dir/agent-broadcast-start"
+    fi
     if [ -z "${ANTHROPIC_API_KEY:-}" ] && ! claude auth status >/dev/null 2>&1; then
       printf 'agent-broadcast: provide ANTHROPIC_API_KEY or a Claude --auth-dir\n' >&2
       exit 1
