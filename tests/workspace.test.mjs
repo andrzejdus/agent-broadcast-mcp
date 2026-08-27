@@ -82,3 +82,25 @@ test("reports a failed workspace bootstrap instead of running with an empty path
   assert.match(result.stderr, /must be outside/);
   assert.doesNotMatch(result.stdout, /workspace=/);
 });
+
+function rejectAuthDir(path) {
+  return spawnSync(
+    "bash",
+    ["-c", 'source "$1"; reject_personal_config_dir "$2"', "auth-test", common, path],
+    { encoding: "utf8", env: { ...process.env, HOME: "/home/tester" } },
+  );
+}
+
+test("refuses a personal harness config directory as --auth-dir", () => {
+  for (const path of ["/home/tester/.claude", "/home/tester/.codex", "/home/tester"]) {
+    const result = rejectAuthDir(path);
+    assert.notEqual(result.status, 0, path);
+    assert.match(result.stderr, /refusing to use/);
+  }
+});
+
+test("allows a dedicated auth directory", () => {
+  const result = rejectAuthDir("/home/tester/agent-rooms/scout-auth");
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(result.stderr, "");
+});

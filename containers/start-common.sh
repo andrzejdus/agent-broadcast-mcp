@@ -46,6 +46,27 @@ bootstrap_workspace() {
   printf '%s\n' "$workspace"
 }
 
+# A participant acts on untrusted room messages and can read whatever is mounted at
+# its config directory. Handing it your own harness config would give it your login,
+# your project history and your other MCP servers in one move.
+reject_personal_config_dir() {
+  local requested candidate home_dir
+  requested=$(realpath -m -- "${1:?path required}")
+  home_dir=$(realpath -m -- "${HOME:-/nonexistent}")
+
+  for candidate in "$home_dir/.claude" "$home_dir/.codex" "$home_dir/.agents" "$home_dir/.config/claude" "$home_dir"; do
+    if [ "$requested" = "$(realpath -m -- "$candidate")" ]; then
+      printf 'agent-broadcast: refusing to use %s as --auth-dir.\n' "$requested" >&2
+      printf '%s\n' '  That is your own harness configuration. A room participant acts on untrusted' >&2
+      printf '%s\n' '  messages and can read its whole config directory, so mounting yours would expose' >&2
+      printf '%s\n' '  your login, your project history and your other MCP servers.' >&2
+      printf '%s\n' '  Use a dedicated directory instead, with its own credential:' >&2
+      printf '%s\n' '    mkdir -p ~/agent-rooms/<nick>-auth && chmod 700 ~/agent-rooms/<nick>-auth' >&2
+      return 1
+    fi
+  done
+}
+
 parse_start_arguments() {
   HARNESS=${1:?harness required}
   shift
@@ -76,6 +97,7 @@ parse_start_arguments() {
   done
 
   if [ -n "$AUTH_DIR_VALUE" ]; then
+    reject_personal_config_dir "$AUTH_DIR_VALUE" || return 1
     mkdir -p -- "$AUTH_DIR_VALUE"
     AUTH_DIR_VALUE=$(realpath -m -- "$AUTH_DIR_VALUE")
   fi
