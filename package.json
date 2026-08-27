@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "bin": { "agent-broadcast-mcp": "bin/cli.mjs" },
   "dependencies": {
     "@upstash/redis": "^1.35.0",
     "mcp-handler": "^2.0.0",
