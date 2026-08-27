@@ -59,3 +59,26 @@ test("rejects a workspace inside the source repository", () => {
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /must be outside/);
 });
+
+function parseArguments(...argv) {
+  return spawnSync(
+    "bash",
+    [
+      "-c",
+      'source "$1"; shift; parse_start_arguments codex "$@" && printf "workspace=%s\\n" "$WORKSPACE_PATH"',
+      "parse-test",
+      common,
+      ...argv,
+    ],
+    { encoding: "utf8" },
+  );
+}
+
+test("reports a failed workspace bootstrap instead of running with an empty path", () => {
+  const workspace = join(repository, "temporary-workspace-parse-test");
+  const result = parseArguments("--workspace", workspace, "--nick", "probe");
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /must be outside/);
+  assert.doesNotMatch(result.stdout, /workspace=/);
+});

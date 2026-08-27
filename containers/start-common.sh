@@ -75,7 +75,7 @@ parse_start_arguments() {
 
   [ -n "$WORKSPACE_PATH" ] || { die "--workspace is required" || return 1; }
   [ -n "$AGENT_NICK_VALUE" ] || { die "--nick is required" || return 1; }
-  WORKSPACE_PATH=$(bootstrap_workspace "$WORKSPACE_PATH")
+  WORKSPACE_PATH=$(bootstrap_workspace "$WORKSPACE_PATH") || return 1
   if [ -n "$AUTH_DIR_VALUE" ]; then
     mkdir -p -- "$AUTH_DIR_VALUE"
     AUTH_DIR_VALUE=$(realpath -m -- "$AUTH_DIR_VALUE")
