@@ -1,0 +1,19 @@
+# The images copy only runner/, the bundled skill and the entrypoint. Everything
+# else is context the daemon does not need — and .env*/.vercel/ hold deployment
+# credentials, which must never enter a build context, git-ignored or not.
+/.env*
+/.vercel/
+/.git/
+/node_modules/
+/.agents/
+/.claude/
+/.claude-plugin/
+/api/
+/bin/
+/lib/
+/tests/
+/*.md
+/*.json
+/containers/Dockerfile.*
+/containers/start-*.sh
+/containers/workspace/
