@@ -57,6 +57,7 @@ parse_start_arguments() {
   AUTH_DIR_VALUE=
   FORCE_BUILD=0
   DETACH=0
+  LOGIN_MODE=0
 
   while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -66,6 +67,7 @@ parse_start_arguments() {
       --persona) PERSONA_VALUE=${2:?--persona requires text}; shift 2 ;;
       --model) MODEL_VALUE=${2:?--model requires a value}; shift 2 ;;
       --auth-dir) AUTH_DIR_VALUE=${2:?--auth-dir requires a path}; shift 2 ;;
+      --login) LOGIN_MODE=1; shift ;;
       --build) FORCE_BUILD=1; shift ;;
       --detach) DETACH=1; shift ;;
       --help|-h) print_start_usage "$HARNESS"; return 2 ;;
@@ -73,19 +75,56 @@ parse_start_arguments() {
     esac
   done
 
-  [ -n "$WORKSPACE_PATH" ] || { die "--workspace is required" || return 1; }
-  [ -n "$AGENT_NICK_VALUE" ] || { die "--nick is required" || return 1; }
-  WORKSPACE_PATH=$(bootstrap_workspace "$WORKSPACE_PATH") || return 1
   if [ -n "$AUTH_DIR_VALUE" ]; then
     mkdir -p -- "$AUTH_DIR_VALUE"
     AUTH_DIR_VALUE=$(realpath -m -- "$AUTH_DIR_VALUE")
   fi
+
+  if [ "$LOGIN_MODE" -eq 1 ]; then
+    [ -n "$AUTH_DIR_VALUE" ] || { die "--login requires --auth-dir" || return 1; }
+    return 0
+  fi
+
+  [ -n "$WORKSPACE_PATH" ] || { die "--workspace is required" || return 1; }
+  [ -n "$AGENT_NICK_VALUE" ] || { die "--nick is required" || return 1; }
+  WORKSPACE_PATH=$(bootstrap_workspace "$WORKSPACE_PATH") || return 1
 }
 
 print_start_usage() {
   local harness=${1:-codex}
   printf 'Usage: containers/start-%s.sh --workspace <outside-repo-path> --nick <name> [options]\n' "$harness"
+  printf '       containers/start-%s.sh --auth-dir <path> --login\n' "$harness"
   printf '%s\n' 'Options: --room <url> --persona <text> --model <name> --auth-dir <path> --build --detach'
+  printf '%s\n' '--login signs in inside the container and stores the result in --auth-dir,'
+  printf '%s\n' 'so later runs need no API key in the environment.'
+}
+
+ensure_image() {
+  local dockerfile=${1:?Dockerfile required}
+  local image_name=${2:?image name required}
+  if [ "$FORCE_BUILD" -eq 1 ] || ! docker image inspect "$image_name" >/dev/null 2>&1; then
+    docker build --file "$dockerfile" --tag "$image_name" "$REPO_ROOT"
+  fi
+}
+
+# Signs in inside the image and leaves the credentials in the mounted --auth-dir.
+# The normal entrypoint refuses to start without credentials, so it is bypassed here.
+run_login_container() {
+  local dockerfile=${1:?Dockerfile required}
+  local image_name=${2:?image name required}
+  local auth_target=${3:?auth target required}
+  shift 3
+  ensure_image "$dockerfile" "$image_name"
+
+  local run_args=(run --rm --interactive)
+  [ -t 0 ] && run_args+=(--tty)
+  run_args+=(
+    --entrypoint "$1"
+    --mount "type=bind,src=$AUTH_DIR_VALUE,dst=$auth_target"
+  )
+  shift
+  printf 'agent-broadcast: signing in; credentials will be stored in %s\n' "$AUTH_DIR_VALUE" >&2
+  docker "${run_args[@]}" "$image_name" "$@"
 }
 
 run_agent_container() {
@@ -93,12 +132,9 @@ run_agent_container() {
   local image_name=${2:?image name required}
   local auth_target=${3:?auth target required}
   local container_nick
+  ensure_image "$dockerfile" "$image_name"
   container_nick=$(printf '%s' "$AGENT_NICK_VALUE" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9_.-' '-' | sed 's/^-//;s/-$//' | cut -c1-40)
   [ -n "$container_nick" ] || container_nick=agent
-
-  if [ "$FORCE_BUILD" -eq 1 ] || ! docker image inspect "$image_name" >/dev/null 2>&1; then
-    docker build --file "$dockerfile" --tag "$image_name" "$REPO_ROOT"
-  fi
 
   local run_args=(run --rm --name "agent-broadcast-$HARNESS-$container_nick")
   if [ "$DETACH" -eq 1 ]; then

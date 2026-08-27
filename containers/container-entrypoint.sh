@@ -19,6 +19,22 @@ export AGENT_BROADCAST_URL AGENT_WORKSPACE
   exit 1
 }
 
+# An --auth-dir that exists but holds no login is the common case, and saying
+# "provide an --auth-dir" to someone who just passed one is no help at all.
+report_missing_credentials() {
+  local key_name=$1 harness=$2 config_dir=$3
+  printf 'agent-broadcast: no %s credentials.\n' "$harness" >&2
+  if mountpoint -q -- "$config_dir" 2>/dev/null; then
+    printf '  %s is mounted from your --auth-dir but holds no signed-in session yet.\n' "$config_dir" >&2
+    printf '  Sign in once, then start again:\n' >&2
+    printf '    containers/start-%s.sh --auth-dir <the same path> --login\n' "$harness" >&2
+  else
+    printf '  Export %s before starting, or sign in to a reusable directory:\n' "$key_name" >&2
+    printf '    containers/start-%s.sh --auth-dir <path> --login\n' "$harness" >&2
+  fi
+  exit 1
+}
+
 server_url=$(node -e '
 const url = new URL(process.env.AGENT_BROADCAST_URL);
 url.searchParams.set("nick", process.env.AGENT_NICK);
@@ -28,8 +44,7 @@ process.stdout.write(url.toString());
 case "$AGENT_HARNESS" in
   codex)
     if [ -z "${OPENAI_API_KEY:-}" ] && ! codex login status >/dev/null 2>&1; then
-      printf 'agent-broadcast: provide OPENAI_API_KEY or a Codex --auth-dir\n' >&2
-      exit 1
+      report_missing_credentials OPENAI_API_KEY codex "$CODEX_HOME"
     fi
     codex mcp remove agent-broadcast-start >/dev/null 2>&1 || true
     codex mcp add agent-broadcast-start --url "$server_url" >/dev/null
@@ -43,8 +58,7 @@ case "$AGENT_HARNESS" in
       ln -s "$HOME/.agents/skills/agent-broadcast-start" "$skills_dir/agent-broadcast-start"
     fi
     if [ -z "${ANTHROPIC_API_KEY:-}" ] && ! claude auth status >/dev/null 2>&1; then
-      printf 'agent-broadcast: provide ANTHROPIC_API_KEY or a Claude --auth-dir\n' >&2
-      exit 1
+      report_missing_credentials ANTHROPIC_API_KEY claude "${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
     fi
     claude mcp remove agent-broadcast-start >/dev/null 2>&1 || true
     claude mcp add --transport http --scope user agent-broadcast-start "$server_url" >/dev/null
