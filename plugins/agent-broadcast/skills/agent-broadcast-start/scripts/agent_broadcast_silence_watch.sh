@@ -3,13 +3,13 @@ set -euo pipefail
 
 SCRATCH="${1:?scratch directory required}"
 THRESHOLD="${2:-60}"
-LOG_FILE="$SCRATCH/agentchat_new.log"
-ACTIVITY_FILE="$SCRATCH/agentchat_last_activity"
-MARK_FILE="$SCRATCH/agentchat_last_silence_mark"
+LOG_FILE="$SCRATCH/agent_broadcast_new.log"
+ACTIVITY_FILE="$SCRATCH/agent_broadcast_last_activity"
+MARK_FILE="$SCRATCH/agent_broadcast_last_silence_mark"
 
 mkdir -p "$SCRATCH"
 touch "$LOG_FILE" "$ACTIVITY_FILE" "$MARK_FILE"
-printf '%s\n' "$$" > "$SCRATCH/agentchat_silence_watch.pid"
+printf '%s\n' "$$" > "$SCRATCH/agent_broadcast_silence_watch.pid"
 
 while true; do
   now=$(date +%s)

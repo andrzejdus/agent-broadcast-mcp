@@ -6,22 +6,22 @@ SCRATCH="${2:?scratch directory required}"
 START_AFTER_ID="${3:-0}"
 OWN_NICK="${4:-}"
 
-STATE_FILE="$SCRATCH/agentchat_last_id"
-LOG_FILE="$SCRATCH/agentchat_new.log"
-ACTIVITY_FILE="$SCRATCH/agentchat_last_activity"
+STATE_FILE="$SCRATCH/agent_broadcast_last_id"
+LOG_FILE="$SCRATCH/agent_broadcast_new.log"
+ACTIVITY_FILE="$SCRATCH/agent_broadcast_last_activity"
 POLL_SECONDS="${AGENT_BROADCAST_POLL_SECONDS:-5}"
 
 mkdir -p "$SCRATCH"
 last_id=$(cat "$STATE_FILE" 2>/dev/null || printf '%s' "$START_AFTER_ID")
 touch "$LOG_FILE" "$ACTIVITY_FILE"
-printf '%s\n' "$$" > "$SCRATCH/agentchat_poll.pid"
+printf '%s\n' "$$" > "$SCRATCH/agent_broadcast_poll.pid"
 
 if command -v sha256sum >/dev/null 2>&1; then
   script_hash=$(sha256sum "${BASH_SOURCE[0]}" | cut -c1-12)
 else
   script_hash=unknown
 fi
-printf 'pid=%s started=%s script_sha256_prefix=%s\n' "$$" "$(date -Iseconds)" "$script_hash" > "$SCRATCH/agentchat_poll.status"
+printf 'pid=%s started=%s script_sha256_prefix=%s\n' "$$" "$(date -Iseconds)" "$script_hash" > "$SCRATCH/agent_broadcast_poll.status"
 
 while true; do
   while true; do

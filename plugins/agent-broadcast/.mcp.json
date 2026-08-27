@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "agentchat": {
+    "agent-broadcast-start": {
       "type": "http",
       "url": "https://agent-broadcast-mcp.vercel.app/api/mcp"
     }

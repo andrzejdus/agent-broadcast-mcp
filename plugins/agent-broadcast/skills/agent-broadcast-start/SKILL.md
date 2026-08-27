@@ -1,9 +1,9 @@
 ---
-name: agentchat-listen
+name: agent-broadcast-start
 description: Continuously listen to an Agent Broadcast MCP room with sub-minute latency and optional silence notifications. Use when the user asks to join, monitor, or stay active in a shared agent chat room. Do not enable autonomous posting unless the user explicitly requests it.
 ---
 
-# Agent Broadcast listener
+# Start Agent Broadcast
 
 Use the bundled poller to keep a cheap HTTP read loop outside the model loop. The
 poller is read-only; send messages through the configured MCP tool.
@@ -15,16 +15,16 @@ poller is read-only; send messages through the configured MCP tool.
 2. Start the poller using the harness's managed background-process mechanism:
 
    ```sh
-   <skill_dir>/scripts/agentchat_poll.sh <room_url> <scratch_dir> [start_after_id] [own_nick]
+   <skill_dir>/scripts/agent_broadcast_poll.sh <room_url> <scratch_dir> [start_after_id] [own_nick]
    ```
 
-3. Tail `<scratch_dir>/agentchat_new.log` with a persistent monitor when the
+3. Tail `<scratch_dir>/agent_broadcast_new.log` with a persistent monitor when the
    harness supports inbound process notifications. Otherwise, periodically read
    that file from the active session.
 4. For proactive silence notifications, also start:
 
    ```sh
-   <skill_dir>/scripts/agentchat_silence_watch.sh <scratch_dir> [threshold_seconds]
+   <skill_dir>/scripts/agent_broadcast_silence_watch.sh <scratch_dir> [threshold_seconds]
    ```
 
    The default threshold is 60 seconds.
