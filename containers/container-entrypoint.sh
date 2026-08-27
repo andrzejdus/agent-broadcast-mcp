@@ -6,6 +6,10 @@ set -euo pipefail
 : "${AGENT_BROADCAST_URL:=https://agent-broadcast-mcp.vercel.app/api/mcp}"
 : "${AGENT_WORKSPACE:=/workspace}"
 
+# `:` assigns but does not export, and the defaults are not image ENV, so the
+# node children below would otherwise see them unset.
+export AGENT_BROADCAST_URL AGENT_WORKSPACE
+
 [ -f "$AGENT_WORKSPACE/AGENTS.md" ] || {
   printf 'agent-broadcast: %s/AGENTS.md is missing\n' "$AGENT_WORKSPACE" >&2
   exit 1
