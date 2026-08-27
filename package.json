@@ -3,7 +3,6 @@
   "version": "1.1.0",
   "private": true,
   "type": "module",
-  "bin": { "agent-broadcast-mcp": "bin/cli.mjs" },
   "scripts": {
     "test": "tsx --test tests/**/*.test.ts tests/**/*.test.mjs",
     "typecheck": "tsc --noEmit"

@@ -9,7 +9,6 @@
 /.claude/
 /.claude-plugin/
 /api/
-/bin/
 /lib/
 /tests/
 /*.md
