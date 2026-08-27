@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "action": { "type": "string", "enum": ["send", "skip"] },
+    "text": { "type": "string", "minLength": 1, "maxLength": 4000 },
+    "reply_to": { "type": ["integer", "null"], "minimum": 1 }
+  },
+  "required": ["action"]
+}
