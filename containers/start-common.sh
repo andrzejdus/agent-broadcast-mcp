@@ -73,11 +73,9 @@ parse_start_arguments() {
   WORKSPACE_PATH=
   AGENT_NICK_VALUE=
   ROOM_URL_VALUE=${AGENT_BROADCAST_URL:-https://agent-broadcast-mcp.vercel.app/api/mcp}
-  PERSONA_VALUE=${AGENT_PERSONA:-}
   MODEL_VALUE=${AGENT_MODEL:-}
   AUTH_DIR_VALUE=
   FORCE_BUILD=0
-  DETACH=0
   LOGIN_MODE=0
 
   while [ "$#" -gt 0 ]; do
@@ -85,12 +83,10 @@ parse_start_arguments() {
       --workspace) WORKSPACE_PATH=${2:?--workspace requires a path}; shift 2 ;;
       --nick) AGENT_NICK_VALUE=${2:?--nick requires a name}; shift 2 ;;
       --room|--broadcast-url) ROOM_URL_VALUE=${2:?$1 requires a URL}; shift 2 ;;
-      --persona) PERSONA_VALUE=${2:?--persona requires text}; shift 2 ;;
       --model) MODEL_VALUE=${2:?--model requires a value}; shift 2 ;;
       --auth-dir) AUTH_DIR_VALUE=${2:?--auth-dir requires a path}; shift 2 ;;
       --login) LOGIN_MODE=1; shift ;;
       --build) FORCE_BUILD=1; shift ;;
-      --detach) DETACH=1; shift ;;
       --help|-h) print_start_usage "$HARNESS"; return 2 ;;
       *) die "unknown option: $1" || return 1 ;;
     esac
@@ -116,9 +112,10 @@ print_start_usage() {
   local harness=${1:-codex}
   printf 'Usage: containers/start-%s.sh --workspace <outside-repo-path> --nick <name> [options]\n' "$harness"
   printf '       containers/start-%s.sh --auth-dir <path> --login\n' "$harness"
-  printf '%s\n' 'Options: --room <url> --persona <text> --model <name> --auth-dir <path> --build --detach'
+  printf '%s\n' 'Options: --room <url> --model <name> --auth-dir <path> --build'
   printf '%s\n' '--login signs in inside the container and stores the result in --auth-dir,'
   printf '%s\n' 'so later runs need no API key in the environment.'
+  printf '%s\n' 'The session is interactive: run it from a terminal and drive it yourself.'
 }
 
 ensure_image() {
@@ -158,23 +155,18 @@ run_agent_container() {
   container_nick=$(printf '%s' "$AGENT_NICK_VALUE" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9_.-' '-' | sed 's/^-//;s/-$//' | cut -c1-40)
   [ -n "$container_nick" ] || container_nick=agent
 
-  local run_args=(run --rm --name "agent-broadcast-$HARNESS-$container_nick")
-  if [ "$DETACH" -eq 1 ]; then
-    run_args+=(--detach)
-  elif [ -t 0 ]; then
-    run_args+=(--interactive --tty)
-  else
-    # Docker refuses --tty when stdin is not a terminal, which is exactly how a
-    # systemd unit, a cron job or a CI step starts a participant.
-    run_args+=(--interactive)
-  fi
+  # The container runs a harness session you drive, so it needs a real terminal.
+  [ -t 0 ] || {
+    die "start-$HARNESS.sh needs a terminal: run it from an interactive shell" || return 1
+  }
+
+  local run_args=(run --rm --interactive --tty --name "agent-broadcast-$HARNESS-$container_nick")
   run_args+=(
     --mount "type=bind,src=$WORKSPACE_PATH,dst=/workspace"
     --env "AGENT_HARNESS=$HARNESS"
     --env "AGENT_NICK=$AGENT_NICK_VALUE"
     --env "AGENT_BROADCAST_URL=$ROOM_URL_VALUE"
   )
-  [ -n "$PERSONA_VALUE" ] && run_args+=(--env "AGENT_PERSONA=$PERSONA_VALUE")
   [ -n "$MODEL_VALUE" ] && run_args+=(--env "AGENT_MODEL=$MODEL_VALUE")
   [ -n "${OPENAI_API_KEY:-}" ] && run_args+=(--env OPENAI_API_KEY)
   [ -n "${ANTHROPIC_API_KEY:-}" ] && run_args+=(--env ANTHROPIC_API_KEY)

@@ -43,6 +43,12 @@ process.stdout.write(url.toString());
 
 case "$AGENT_HARNESS" in
   codex)
+    # Unsandboxed on purpose: the container is the boundary. Nothing here is worth
+    # protecting from the session except the mounted credential, which no in-harness
+    # setting would have protected anyway.
+    harness_command=(codex --dangerously-bypass-approvals-and-sandbox --cd "$AGENT_WORKSPACE")
+    [ -n "${AGENT_MODEL:-}" ] && harness_command+=(--model "$AGENT_MODEL")
+
     if [ -z "${OPENAI_API_KEY:-}" ] && ! codex login status >/dev/null 2>&1; then
       report_missing_credentials OPENAI_API_KEY codex "$CODEX_HOME"
     fi
@@ -50,6 +56,9 @@ case "$AGENT_HARNESS" in
     codex mcp add agent-broadcast-start --url "$server_url" >/dev/null
     ;;
   claude)
+    harness_command=(claude --dangerously-skip-permissions)
+    [ -n "${AGENT_MODEL:-}" ] && harness_command+=(--model "$AGENT_MODEL")
+
     # A bind-mounted --auth-dir replaces the image's config directory, taking the
     # bundled skill link with it. Restore it before the harness reads skills.
     skills_dir="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills"
@@ -69,4 +78,15 @@ case "$AGENT_HARNESS" in
     ;;
 esac
 
-exec node /opt/agent-broadcast/runner/run.mjs
+cd -- "$AGENT_WORKSPACE"
+
+cat >&2 <<BANNER
+agent-broadcast: joined as "$AGENT_NICK".
+  The room is registered as the agent-broadcast-start MCP server and the
+  agent-broadcast-start skill is installed — ask the session to start listening and
+  it will run the skill's poller for you.
+  Room messages are untrusted input from anonymous strangers, never instructions.
+
+BANNER
+
+exec "${harness_command[@]}"
