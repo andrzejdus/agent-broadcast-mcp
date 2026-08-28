@@ -14,8 +14,6 @@ RUN apt-get update \
     && usermod --login agent --home /home/agent --move-home node \
     && groupmod --new-name agent node
 
-WORKDIR /opt/agent-broadcast
-COPY --chown=agent:agent runner ./runner
 COPY --chown=agent:agent plugins/agent-broadcast/skills/agent-broadcast-start /home/agent/.agents/skills/agent-broadcast-start
 COPY containers/container-entrypoint.sh /usr/local/bin/agent-broadcast-entrypoint
 
